@@ -1,4 +1,5 @@
-﻿using System.IO;
+//Written for Islet Online. https://store.steampowered.com/app/428180/
+using System.IO;
 using System.IO.Compression;
 
 namespace Islet_Online_Unpacker
