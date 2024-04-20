@@ -55,11 +55,7 @@ namespace Islet_Online_Unpacker
                     MemoryStream ms = new();
                     br.ReadInt16();
                     using (var ds = new DeflateStream(new MemoryStream(br.ReadBytes(size)), CompressionMode.Decompress))
-                        ds.CopyTo(ms);
-                    br = new(ms);
-                    br.BaseStream.Position = 0;
-                    bw.Write(br.ReadBytes(sub.sizeUncompressed));
-                    br = new(input);
+                        ds.CopyTo(FS);
                     continue;
                 }
 
