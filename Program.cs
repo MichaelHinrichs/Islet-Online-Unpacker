@@ -8,9 +8,9 @@ namespace Islet_Online_Unpacker
     {
         static void Main(string[] args)
         {
-            using FileStream source = File.OpenRead(args[0]);
-            BinaryReader br = new(source);
-            Directory.CreateDirectory(Path.GetDirectoryName(source.Name) + "//" + Path.GetFileNameWithoutExtension(source.Name));
+            using FileStream input = File.OpenRead(args[0]);
+            BinaryReader br = new(input);
+            Directory.CreateDirectory(Path.GetDirectoryName(input.Name) + "//" + Path.GetFileNameWithoutExtension(input.Name));
             while (br.BaseStream.Position < br.BaseStream.Length)
             {
                 int size = br.ReadInt32();
@@ -22,31 +22,31 @@ namespace Islet_Online_Unpacker
                 br.BaseStream.Position += size;
             }
 
-            System.Collections.Generic.List<SUBFILE> subfiles = new();
+            System.Collections.Generic.List<Subfile> subfiles = new();
             while (br.BaseStream.Position < br.BaseStream.Length - 0x28)
             {
-                SUBFILE subfile = new()
+                Subfile subfile = new()
                 {
                     isCompressed = br.ReadInt32(),
                     sizeUncompressed = br.ReadInt32(),
                     sizeCompressed = br.ReadInt32(),
-                    offset = br.ReadInt32()
+                    start = br.ReadInt32()
                 };
                 br.ReadBytes(20);
                 subfile.name = new(br.ReadChars(br.ReadInt16()));
                 subfiles.Add(subfile);
             }
-            foreach (SUBFILE sub in subfiles)
+            foreach (Subfile sub in subfiles)
             {
-                br.BaseStream.Position = sub.offset;
+                br.BaseStream.Position = sub.start;
                 int size = br.ReadInt32();
                 if ((sub.isCompressed == 0 && size != sub.sizeUncompressed) || (sub.isCompressed == 0x100 && size != sub.sizeCompressed))
                     throw new System.Exception("Fuck.");
 
                 if (sub.name.Contains(@"\"))
-                    Directory.CreateDirectory(Path.GetDirectoryName(source.Name) + "//" + Path.GetDirectoryName(sub.name));
+                    Directory.CreateDirectory(Path.GetDirectoryName(input.Name) + "//" + Path.GetDirectoryName(sub.name));
 
-                using FileStream FS = File.Create(Path.GetDirectoryName(source.Name) + "//" + sub.name);
+                using FileStream FS = File.Create(Path.GetDirectoryName(input.Name) + "//" + sub.name);
                 BinaryWriter bw = new(FS);
                 if (sub.isCompressed == 0x100)
                 {
@@ -57,7 +57,7 @@ namespace Islet_Online_Unpacker
                     br = new(ms);
                     br.BaseStream.Position = 0;
                     bw.Write(br.ReadBytes(sub.sizeUncompressed));
-                    br = new(source);
+                    br = new(input);
                     continue;
                 }
 
@@ -65,12 +65,12 @@ namespace Islet_Online_Unpacker
                 bw.Close();
             }
         }
-        struct SUBFILE
+        struct Subfile
         {
             public int isCompressed;
             public int sizeUncompressed;
             public int sizeCompressed;
-            public int offset;
+            public int start;
             public string name;
         }
     }
