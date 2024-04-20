@@ -11,6 +11,7 @@ namespace Islet_Online_Unpacker
             using FileStream input = File.OpenRead(args[0]);
             BinaryReader br = new(input);
             Directory.CreateDirectory(Path.GetDirectoryName(input.Name) + "//" + Path.GetFileNameWithoutExtension(input.Name));
+
             while (br.BaseStream.Position < br.BaseStream.Length)
             {
                 int size = br.ReadInt32();
@@ -36,6 +37,7 @@ namespace Islet_Online_Unpacker
                 subfile.name = new(br.ReadChars(br.ReadInt16()));
                 subfiles.Add(subfile);
             }
+
             foreach (Subfile sub in subfiles)
             {
                 br.BaseStream.Position = sub.start;
@@ -65,6 +67,7 @@ namespace Islet_Online_Unpacker
                 bw.Close();
             }
         }
+
         struct Subfile
         {
             public int isCompressed;
